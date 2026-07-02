@@ -229,6 +229,114 @@
       margin-top:20px;
     }
 
+
+    .calc-title-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .info-btn {
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      text-align:center;
+      font-size:1.1rem;
+      font-weight:950;
+      color:#fff;
+      background:linear-gradient(180deg, var(--blue1), var(--blue2));
+      flex:0 0 auto;
+    }
+
+    .formula-line {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:7px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      font-weight:750;
+    }
+
+    .formula-line strong {
+      color:var(--text);
+    }
+
+    .formula-total {
+      margin-top:10px;
+      padding-top:10px;
+      border-top:2px solid rgba(255,255,255,.18);
+    }
+
+    .modal {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.82);
+      z-index:9999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:12px;
+    }
+
+    .modal.active {
+      display:flex;
+    }
+
+    .modal-card {
+      width:100%;
+      max-width:980px;
+      background:#061226;
+      border:1px solid #0b57c8;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 22px 60px rgba(0,0,0,.55);
+    }
+
+    .modal-top {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      background:linear-gradient(180deg,#063477,#052054);
+      color:white;
+      font-weight:900;
+      font-size:1rem;
+    }
+
+    .modal-close {
+      width:36px;
+      height:36px;
+      border-radius:10px;
+      padding:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.16);
+      color:white;
+      font-size:1.4rem;
+    }
+
+    .modal-img {
+      width:100%;
+      display:block;
+      background:white;
+    }
+
+    .modal-bottom {
+      padding:12px;
+      background:#061226;
+    }
+
+    .modal-bottom button {
+      text-align:center;
+    }
+
     #printArea { display:none; }
 
     @media print {
@@ -265,7 +373,6 @@
       <img src="jmp-logo.png" class="logo" alt="JMP logo" />
       <div class="menu">
         <button class="menu-btn blue" onclick="openCalculator('tuner')">Calculate Tuner <small>Calculate tuner length</small></button>
-        <button class="menu-btn blue" onclick="openCalculator('tube')">Calculate Tube <small>Calculate bloop tube length</small></button>
         <button class="menu-btn green" onclick="showProfiles()">Open Barrel Profile <small>View saved barrel profiles</small></button>
         <button class="menu-btn green" onclick="newProfile()">New Barrel Profile <small>Create a new barrel profile</small></button>
         <button class="menu-btn gray" onclick="showAbout()">About <small>About JMP Harmonic Calculator</small></button>
@@ -276,7 +383,10 @@
     <section id="calculatorScreen" class="screen">
       <span class="back" onclick="showHome()">‹ Back</span>
       <div class="card">
-        <h2 id="calcTitle">Calculator</h2>
+        <div class="calc-title-row">
+          <h2 id="calcTitle">Calculator</h2>
+          <button class="info-btn" onclick="showMeasureInfo()" aria-label="Measurement info">i</button>
+        </div>
         <div class="stack">
           <div>
             <label>Barrel Length</label>
@@ -338,10 +448,11 @@
           <div><label>Barrel Length</label><input id="pBarrelLength" type="number" inputmode="decimal" step="0.001" /></div>
           <div><label>Grooves</label><input id="pGrooves" type="number" inputmode="numeric" step="1" /></div>
           <div><label>Round Count</label><input id="pRoundCount" type="number" inputmode="numeric" step="1" /></div>
-          <div><label>Tuner Setting</label><input id="pTunerSetting" type="text" /></div>
+          <div><label>Tuner Setting</label><input id="pTunerSetting" type="number" inputmode="decimal" step="0.5" min="0" max="500" /></div>
+          <div><label>Tuner w/ Tube Setting</label><input id="pTunerTubeSetting" type="number" inputmode="decimal" step="0.5" min="0" max="500" /></div>
           <div><label>Notes</label><textarea id="pNotes"></textarea></div>
           <button class="green" onclick="saveProfile()">Save Profile</button>
-          <div id="profileError" class="error">Profile Name and Barrel Length are required.</div>
+          <div id="profileError" class="error">Profile Name and Barrel Length are required. Tuner settings must be 0-500 in .5 increments.</div>
         </div>
       </div>
     </section>
@@ -357,6 +468,32 @@
     </section>
   </main>
 
+
+    <section id="saveCalculationScreen" class="screen">
+      <span class="back" onclick="screen('calculatorScreen')">‹ Back</span>
+      <div class="card">
+        <h2>Save Calculation</h2>
+        <p class="subtitle">Choose a saved barrel profile to add this calculation to, or create a new barrel profile.</p>
+        <div id="saveProfileList"></div>
+        <button class="green" onclick="newProfileForCalculation()">New Barrel Profile</button>
+      </div>
+    </section>
+
+
+
+  <div id="measureInfoModal" class="modal" onclick="closeMeasureInfo(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <span id="measureInfoTitle">Measurement Info</span>
+        <button class="modal-close" onclick="hideMeasureInfo()">×</button>
+      </div>
+      <img id="measureInfoImage" class="modal-img" src="" alt="Measurement information" />
+      <div class="modal-bottom">
+        <button class="blue" onclick="hideMeasureInfo()">Got It</button>
+      </div>
+    </div>
+  </div>
+
   <div id="printArea"></div>
 
 <script>
@@ -365,10 +502,37 @@ let currentMode = "tuner";
 let currentResults = [];
 let selectedProfileId = null;
 let editingProfileId = null;
+let pendingSaveCalculation = false;
 
 function saveProfiles(){ localStorage.setItem("jmpProfiles", JSON.stringify(profiles)); }
 function fmt(v){ return Number(v).toFixed(3); }
+
+function getProfileTunerLength(profile){
+  const calcs = (profile && profile.calculations) ? profile.calculations : [];
+  const tunerCalcs = calcs.filter(c => c.mode === "tuner");
+  if(tunerCalcs.length > 0){
+    const latest = tunerCalcs[tunerCalcs.length - 1];
+    if(latest.results && latest.results.length > 0){
+      const ninth = latest.results.find(r => r.harmonicType === "9th Harmonic");
+      return ninth ? Number(ninth.dimension) : Number(latest.results[0].dimension);
+    }
+  }
+
+  const barrelLength = Number(profile?.barrelLength || 0);
+  if(barrelLength > 0){
+    const defaultEndCorrection = 1.341 * 0.264;
+    return ((barrelLength / 8) * 9) - defaultEndCorrection - barrelLength;
+  }
+
+  return 0;
+}
 function id(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()); }
+
+function validTunerSetting(value){
+  if(value === "" || value === null || value === undefined) return true;
+  const n = Number(value);
+  return isFinite(n) && n >= 0 && n <= 500 && Math.abs(n * 2 - Math.round(n * 2)) < 0.000001;
+}
 
 function screen(name){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -376,10 +540,41 @@ function screen(name){
   window.scrollTo(0,0);
 }
 
+function showMeasureInfo(){
+  const modal = document.getElementById("measureInfoModal");
+  const img = document.getElementById("measureInfoImage");
+  const title = document.getElementById("measureInfoTitle");
+
+  if(currentMode === "tube"){
+    img.src = "tube-measure-info.png";
+    title.textContent = "How to Measure Tube Length";
+  } else {
+    img.src = "tuner-measure-info.png";
+    title.textContent = "How to Measure Tuner Length";
+  }
+
+  modal.classList.add("active");
+}
+
+function hideMeasureInfo(){
+  document.getElementById("measureInfoModal").classList.remove("active");
+}
+
+function closeMeasureInfo(event){
+  if(event.target.id === "measureInfoModal"){
+    hideMeasureInfo();
+  }
+}
+
 function showHome(){ screen("homeScreen"); }
 function showAbout(){ screen("aboutScreen"); }
 
 function openCalculator(mode){
+  if(mode === "tube"){
+    alert("Open a barrel profile first, then choose Calculate Tube.");
+    showProfiles();
+    return;
+  }
   currentMode = mode;
   selectedProfileId = null;
   calcBarrelLength.value = "";
@@ -414,39 +609,121 @@ function calculate(){
   }
   calcError.style.display = "none";
   const ec = dia * 0.264;
-  const rows = currentMode === "tuner"
-    ? [{name:"9th Harmonic", h:(bl/8)*9}, {name:"11th Harmonic", h:(bl/10)*11}]
-    : [{name:"3rd Harmonic", h:(bl/2)*3}, {name:"11th Quarter", h:(bl/8)*11}, {name:"13th Quarter", h:(bl/10)*13}];
 
-  currentResults = rows.map(r => ({ harmonicType:r.name, dimension:r.h - ec - bl }));
-  resultsTitle.textContent = currentMode === "tuner" ? "Tuner Results" : "Tube Results";
-  resultsList.innerHTML = currentResults.map(r => `
-    <div class="result-card">
-      <div class="result-title">${r.harmonicType}</div>
-      <div class="result-label">${currentMode === "tuner" ? "Tuner Dimension" : "Tube Dimension"}</div>
-      <div class="result-value">${fmt(r.dimension)}</div>
-    </div>`).join("");
+  if(currentMode === "tuner"){
+    const rows = [{name:"9th Harmonic", h:(bl/8)*9}, {name:"11th Harmonic", h:(bl/10)*11}];
+    currentResults = rows.map(r => ({
+      harmonicType:r.name,
+      dimension:r.h - ec - bl
+    }));
+
+    resultsTitle.textContent = "Tuner Results";
+    resultsList.innerHTML = currentResults.map(r => `
+      <div class="result-card">
+        <div class="result-title">${r.harmonicType}</div>
+        <div class="result-label">Tuner Dimension</div>
+        <div class="result-value">${fmt(r.dimension)}</div>
+      </div>`).join("");
+  } else {
+    const profile = profiles.find(x => x.id === selectedProfileId);
+    const tunerLength = getProfileTunerLength(profile);
+    const rows = [
+      {name:"3rd Harmonic", h:(bl/2)*3},
+      {name:"11th Quarter", h:(bl/8)*11},
+      {name:"13th Quarter", h:(bl/10)*13}
+    ];
+
+    currentResults = rows.map(r => {
+      const tubeTunerLength = r.h - ec - bl;
+      return {
+        harmonicType:r.name,
+        tubeTunerLength:tubeTunerLength,
+        tunerLength:tunerLength,
+        dimension:tubeTunerLength - tunerLength
+      };
+    });
+
+    resultsTitle.textContent = "Tube Results";
+    resultsList.innerHTML = currentResults.map(r => `
+      <div class="result-card">
+        <div class="result-title">${r.harmonicType}</div>
+        <div class="result-label">Tuner & Tube Length</div>
+        <div class="result-value">${fmt(r.tubeTunerLength)}</div>
+        <div class="result-label" style="margin-top:10px;">Calculated Tuner Length Subtracted</div>
+        <div style="font-size:1.2rem;font-weight:900;color:var(--muted);">${fmt(r.tunerLength)}</div>
+        <div class="result-label" style="margin-top:10px;">Tube Length</div>
+        <div class="result-value">${fmt(r.dimension)}</div>
+      </div>`).join("");
+  }
+
   calcResults.style.display = "block";
 }
 
 function saveCalcToSelectedProfile(){
   if(currentResults.length === 0) return;
-  if(selectedProfileId === null){
-    showProfiles();
-    alert("Open a barrel profile first, then calculate from that profile to save the calculation.");
+
+  if(selectedProfileId !== null){
+    saveCurrentCalculationToProfile(selectedProfileId);
     return;
   }
-  const p = profiles.find(x => x.id === selectedProfileId);
-  if(!p) return;
-  p.calculations = p.calculations || [];
-  p.calculations.push({
+
+  showSaveCalculationOptions();
+}
+
+function makeCurrentCalculation(){
+  return {
     date: new Date().toLocaleString(),
     mode: currentMode,
     endDiameter: parseFloat(calcEndDiameter.value),
     results: currentResults
-  });
+  };
+}
+
+function saveCurrentCalculationToProfile(profileId){
+  const p = profiles.find(x => x.id === profileId);
+  if(!p) return;
+
+  p.calculations = p.calculations || [];
+  p.calculations.push(makeCurrentCalculation());
   saveProfiles();
-  openProfile(selectedProfileId);
+  pendingSaveCalculation = false;
+  selectedProfileId = profileId;
+  openProfile(profileId);
+}
+
+function showSaveCalculationOptions(){
+  const list = document.getElementById("saveProfileList");
+
+  if(profiles.length === 0){
+    list.innerHTML = `<div class="empty">No barrel profiles saved yet. Create a new barrel profile to save this calculation.</div>`;
+  } else {
+    list.innerHTML = profiles.map(p => `
+      <div class="profile-card" onclick="saveCurrentCalculationToProfile('${p.id}')">
+        <div class="profile-title">${p.profileName}</div>
+        <div class="meta">
+          Manufacturer: ${p.manufacturer || "-"}<br>
+          Barrel Length: ${fmt(p.barrelLength)} | Grooves: ${p.grooves || "-"}<br>
+          Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}
+        </div>
+      </div>`).join("");
+  }
+
+  screen("saveCalculationScreen");
+}
+
+function newProfileForCalculation(){
+  pendingSaveCalculation = true;
+  editingProfileId = null;
+  profileEditTitle.textContent = "New Barrel Profile";
+  pName.value = "";
+  pManufacturer.value = "";
+  pBarrelLength.value = calcBarrelLength.value || "";
+  pGrooves.value = "";
+  pRoundCount.value = "";
+  pTunerSetting.value = "";
+  pNotes.value = "";
+  profileError.style.display = "none";
+  screen("profileEditScreen");
 }
 
 function showProfiles(){
@@ -481,6 +758,7 @@ function openProfile(profileId){
     <div class="info-row"><span>Grooves</span><span>${p.grooves || "-"}</span></div>
     <div class="info-row"><span>Round Count</span><span>${p.roundCount || "0"}</span></div>
     <div class="info-row"><span>Tuner Setting</span><span>${p.tunerSetting || "-"}</span></div>
+    <div class="info-row"><span>Tuner w/ Tube Setting</span><span>${p.tunerTubeSetting || "-"}</span></div>
     <div class="info-row"><span>Notes</span><span>${p.notes || "-"}</span></div>`;
   renderHistory(p);
   screen("profileDetailScreen");
@@ -496,15 +774,16 @@ function renderHistory(p){
     <div class="profile-card">
       <div class="profile-title">${c.mode === "tuner" ? "Tuner" : "Tube"} Calculation</div>
       <div class="meta">${c.date}<br>End Diameter: ${fmt(c.endDiameter)}</div>
-      ${c.results.map(r => `<div class="info-row"><span>${r.harmonicType}</span><span>${fmt(r.dimension)}</span></div>`).join("")}
+      ${c.results.map(r => `<div class="info-row"><span>${r.harmonicType}</span><span>${r.tubeTunerLength !== undefined ? "Tube Length: " + fmt(r.dimension) + " / Tuner & Tube Length: " + fmt(r.tubeTunerLength) : fmt(r.dimension)}</span></div>`).join("")}
     </div>`).join("");
 }
 
 function newProfile(){
+  pendingSaveCalculation = false;
   editingProfileId = null;
   profileEditTitle.textContent = "New Barrel Profile";
   pName.value = ""; pManufacturer.value = ""; pBarrelLength.value = ""; pGrooves.value = "";
-  pRoundCount.value = ""; pTunerSetting.value = ""; pNotes.value = "";
+  pRoundCount.value = ""; pTunerSetting.value = ""; pTunerTubeSetting.value = ""; pNotes.value = "";
   profileError.style.display = "none";
   screen("profileEditScreen");
 }
@@ -520,6 +799,7 @@ function editCurrentProfile(){
   pGrooves.value = p.grooves || "";
   pRoundCount.value = p.roundCount || "";
   pTunerSetting.value = p.tunerSetting || "";
+  pTunerTubeSetting.value = p.tunerTubeSetting || "";
   pNotes.value = p.notes || "";
   profileError.style.display = "none";
   screen("profileEditScreen");
@@ -528,7 +808,8 @@ function editCurrentProfile(){
 function saveProfile(){
   const name = pName.value.trim();
   const bl = parseFloat(pBarrelLength.value);
-  if(!name || !isFinite(bl) || bl <= 0){
+  if(!name || !isFinite(bl) || bl <= 0 || !validTunerSetting(pTunerSetting.value) || !validTunerSetting(pTunerTubeSetting.value)){
+    profileError.textContent = "Profile Name and Barrel Length are required. Tuner settings must be 0-500 in .5 increments.";
     profileError.style.display = "block";
     return;
   }
@@ -540,6 +821,7 @@ function saveProfile(){
     grooves: pGrooves.value.trim(),
     roundCount: pRoundCount.value.trim(),
     tunerSetting: pTunerSetting.value.trim(),
+    tunerTubeSetting: pTunerTubeSetting.value.trim(),
     notes: pNotes.value.trim(),
     calculations: []
   };
@@ -550,6 +832,15 @@ function saveProfile(){
   } else {
     profiles.push(data);
   }
+  if(pendingSaveCalculation && currentResults.length > 0){
+    const savedProfile = profiles.find(x => x.id === data.id);
+    if(savedProfile){
+      savedProfile.calculations = savedProfile.calculations || [];
+      savedProfile.calculations.push(makeCurrentCalculation());
+    }
+    pendingSaveCalculation = false;
+  }
+
   saveProfiles();
   openProfile(data.id);
 }
@@ -574,7 +865,7 @@ function printCurrentProfile(){
       <div class="print-row"><strong>End Diameter:</strong><span>${fmt(c.endDiameter)}</span></div>
       <table class="print-table">
         <tr><th>Harmonic</th><th>${c.mode === "tuner" ? "Tuner Dimension" : "Tube Dimension"}</th></tr>
-        ${c.results.map(r => `<tr><td>${r.harmonicType}</td><td>${fmt(r.dimension)}</td></tr>`).join("")}
+        ${c.results.map(r => `<tr><td>${r.harmonicType}</td><td>${r.tubeTunerLength !== undefined ? "Tube Length: " + fmt(r.dimension) + " / Tuner & Tube Length: " + fmt(r.tubeTunerLength) : fmt(r.dimension)}</td></tr>`).join("")}
       </table>
     </div>`).join("");
 
@@ -590,6 +881,7 @@ function printCurrentProfile(){
       <div class="print-row"><strong>Grooves:</strong><span>${p.grooves || "-"}</span></div>
       <div class="print-row"><strong>Round Count:</strong><span>${p.roundCount || "0"}</span></div>
       <div class="print-row"><strong>Tuner Setting:</strong><span>${p.tunerSetting || "-"}</span></div>
+      <div class="print-row"><strong>Tuner w/ Tube Setting:</strong><span>${p.tunerTubeSetting || "-"}</span></div>
       <div class="print-row"><strong>Notes:</strong><span>${p.notes || "-"}</span></div>
     </div>
     <h3>Calculated Data</h3>

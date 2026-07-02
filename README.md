@@ -47,3 +47,25 @@ iPhone will open the print/share screen. From there you can print to an AirPrint
 - Data is stored locally on the iPhone browser using localStorage.
 - If you clear Safari website data, the saved barrel profiles can be deleted.
 - Later, this can be converted to a native iPhone app when you have access to a Mac or a cloud Mac service.
+
+
+## Version note
+
+This version fixes saving standalone tuner/tube calculations. After calculating, the user can choose an existing barrel profile or create a new barrel profile to save the calculation.
+
+
+## Version note v3
+
+- Removed Calculate Tube from the main screen.
+- Tube calculation is now available only from an opened barrel profile.
+- Tube results now calculate Tube Length as Tube Tuner Length minus the calculated tuner length saved/derived for the profile.
+
+
+## Version note v4
+
+- Added tuner measurement info image.
+- Added tube measurement info image.
+- Added info button on calculator screen.
+- Added Tuner w/ Tube Setting field to barrel profiles.
+- Tuner Setting and Tuner w/ Tube Setting are validated from 0 to 500 in .5 increments.
+- Updated terminology to use Tuner & Tube Length for tube calculations.

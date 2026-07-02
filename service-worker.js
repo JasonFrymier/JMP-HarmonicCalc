@@ -5,7 +5,9 @@ const FILES = [
   "manifest.json",
   "jmp-logo.png",
   "icon-192.png",
-  "icon-512.png"
+  "icon-512.png",
+  "tuner-measure-info.png",
+  "tube-measure-info.png"
 ];
 
 self.addEventListener("install", event => {
