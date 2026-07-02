@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05070d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="JMP Harmonics" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>JMP Harmonic Calculator</title>
+  <style>
+    :root {
+      --bg:#05070d;
+      --card:#151923;
+      --card2:#1e2634;
+      --text:#f5f7fb;
+      --muted:#aab3c2;
+      --blue1:#0b7dff;
+      --blue2:#004eb8;
+      --green1:#1aa449;
+      --green2:#0b6229;
+      --red1:#c83b3b;
+      --red2:#8d1f1f;
+      --border:#313a4d;
+      --good:#d7ecff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin:0;
+      min-height:100%;
+      background: radial-gradient(circle at top, #111827 0, #05070d 52%, #000 100%);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    }
+
+    body {
+      padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom);
+    }
+
+    .app {
+      max-width: 460px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 18px 0 28px;
+    }
+
+    .center { text-align:center; }
+
+    .logo {
+      width: 100%;
+      max-width: 360px;
+      margin: 4px auto 12px;
+      display:block;
+      filter: drop-shadow(0 18px 28px rgba(0,102,255,.22));
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      line-height: 1.1;
+      letter-spacing:-.02em;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.18rem;
+    }
+
+    .subtitle {
+      color:var(--muted);
+      font-size:.95rem;
+      line-height:1.4;
+      margin-bottom: 14px;
+    }
+
+    .screen { display:none; }
+    .screen.active { display:block; }
+
+    .menu {
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .menu-btn, button {
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:16px;
+      color:white;
+      font-size:1.05rem;
+      font-weight:800;
+      text-align:left;
+      cursor:pointer;
+      box-shadow: inset 0 1px rgba(255,255,255,.2), 0 8px 18px rgba(0,0,0,.22);
+    }
+
+    .menu-btn small {
+      display:block;
+      margin-top:4px;
+      color:rgba(255,255,255,.78);
+      font-size:.88rem;
+      font-weight:500;
+    }
+
+    .blue { background: linear-gradient(180deg, var(--blue1), var(--blue2)); }
+    .green { background: linear-gradient(180deg, var(--green1), var(--green2)); }
+    .gray { background: linear-gradient(180deg, #303846, #1d2430); }
+    .red { background: linear-gradient(180deg, var(--red1), var(--red2)); }
+
+    .card {
+      background:rgba(21,25,35,.94);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      box-shadow:0 14px 32px rgba(0,0,0,.3);
+      margin-bottom:14px;
+    }
+
+    label {
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+      margin-bottom:6px;
+      font-weight:750;
+    }
+
+    input, textarea, select {
+      width:100%;
+      border:1px solid var(--border);
+      background:#0b1019;
+      color:var(--text);
+      border-radius:14px;
+      padding:14px;
+      font-size:1.04rem;
+      outline:none;
+    }
+
+    textarea { min-height:82px; resize:vertical; }
+
+    .stack {
+      display:flex;
+      flex-direction:column;
+      gap:13px;
+    }
+
+    .row {
+      display:flex;
+      gap:10px;
+    }
+
+    .row > * { flex:1; }
+
+    .back {
+      color:#69b0ff;
+      font-weight:800;
+      margin-bottom:14px;
+      display:inline-block;
+      cursor:pointer;
+    }
+
+    .result-card, .profile-card {
+      background:#0f141f;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      margin-bottom:11px;
+    }
+
+    .result-title, .profile-title {
+      font-weight:900;
+      margin-bottom:8px;
+      font-size:1.06rem;
+    }
+
+    .result-label {
+      color:var(--muted);
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      font-weight:850;
+    }
+
+    .result-value {
+      font-size:2rem;
+      font-weight:950;
+      color:var(--good);
+      margin-top:2px;
+    }
+
+    .meta {
+      color:var(--muted);
+      line-height:1.45;
+      font-size:.9rem;
+    }
+
+    .info-row {
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .info-row:last-child { border-bottom:none; }
+    .info-row span:first-child { color:var(--muted); }
+    .info-row span:last-child { text-align:right; }
+
+    .error {
+      color:#ff9d9d;
+      font-weight:850;
+      display:none;
+    }
+
+    .empty {
+      color:var(--muted);
+      padding:14px 0;
+    }
+
+    .footer-note {
+      color:var(--muted);
+      font-size:.85rem;
+      text-align:center;
+      margin-top:20px;
+    }
+
+    #printArea { display:none; }
+
+    @media print {
+      body * { visibility:hidden !important; }
+      #printArea, #printArea * { visibility:visible !important; }
+      #printArea {
+        display:block !important;
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        color:#000;
+        background:#fff;
+        font-family:Arial, sans-serif;
+        padding:24px;
+      }
+      .print-logo { width:260px; display:block; margin:0 auto 8px; }
+      .print-title { text-align:center; font-size:22px; font-weight:bold; margin:0 0 4px; }
+      .print-date { text-align:center; font-size:12px; margin-bottom:18px; }
+      .print-section { border:1px solid #555; padding:10px; margin-bottom:14px; }
+      .print-section h3 { margin:0 0 8px; font-size:15px; }
+      .print-row { display:flex; border-bottom:1px solid #ddd; padding:4px 0; }
+      .print-row:last-child { border-bottom:none; }
+      .print-row strong { width:180px; }
+      .print-table { width:100%; border-collapse:collapse; margin-top:8px; }
+      .print-table th, .print-table td { border:1px solid #777; padding:5px; text-align:left; font-size:12px; }
+      .print-table th { background:#eee; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section id="homeScreen" class="screen active center">
+      <img src="jmp-logo.png" class="logo" alt="JMP logo" />
+      <div class="menu">
+        <button class="menu-btn blue" onclick="openCalculator('tuner')">Calculate Tuner <small>Calculate tuner length</small></button>
+        <button class="menu-btn blue" onclick="openCalculator('tube')">Calculate Tube <small>Calculate bloop tube length</small></button>
+        <button class="menu-btn green" onclick="showProfiles()">Open Barrel Profile <small>View saved barrel profiles</small></button>
+        <button class="menu-btn green" onclick="newProfile()">New Barrel Profile <small>Create a new barrel profile</small></button>
+        <button class="menu-btn gray" onclick="showAbout()">About <small>About JMP Harmonic Calculator</small></button>
+      </div>
+      <div class="footer-note">22 LR Only</div>
+    </section>
+
+    <section id="calculatorScreen" class="screen">
+      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="card">
+        <h2 id="calcTitle">Calculator</h2>
+        <div class="stack">
+          <div>
+            <label>Barrel Length</label>
+            <input id="calcBarrelLength" type="number" inputmode="decimal" step="0.001" placeholder="21.750" />
+          </div>
+          <div>
+            <label id="diameterLabel">End Diameter</label>
+            <input id="calcEndDiameter" type="number" inputmode="decimal" step="0.001" />
+          </div>
+          <button class="blue" onclick="calculate()">Calculate</button>
+          <div id="calcError" class="error">Please enter valid numbers greater than zero.</div>
+        </div>
+      </div>
+      <div id="calcResults" class="card" style="display:none;">
+        <h2 id="resultsTitle">Results</h2>
+        <div id="resultsList"></div>
+        <button class="green" onclick="saveCalcToSelectedProfile()">Save Calculation to Profile</button>
+      </div>
+    </section>
+
+    <section id="profilesScreen" class="screen">
+      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="card">
+        <h2>Barrel Profiles</h2>
+        <div id="profilesList"></div>
+        <button class="green" onclick="newProfile()">New Barrel Profile</button>
+      </div>
+    </section>
+
+    <section id="profileDetailScreen" class="screen">
+      <span class="back" onclick="showProfiles()">‹ Back</span>
+      <div class="card">
+        <h2 id="detailName">Profile</h2>
+        <div id="profileInfo"></div>
+      </div>
+      <div class="card">
+        <h2>Actions</h2>
+        <div class="stack">
+          <button class="blue" onclick="calculateFromProfile('tuner')">Calculate Tuner</button>
+          <button class="blue" onclick="calculateFromProfile('tube')">Calculate Tube</button>
+          <button class="gray" onclick="printCurrentProfile()">Print Profile</button>
+          <button class="green" onclick="editCurrentProfile()">Edit Profile</button>
+          <button class="red" onclick="deleteCurrentProfile()">Delete Profile</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Calculation History</h2>
+        <div id="calcHistory"></div>
+      </div>
+    </section>
+
+    <section id="profileEditScreen" class="screen">
+      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="card">
+        <h2 id="profileEditTitle">New Barrel Profile</h2>
+        <div class="stack">
+          <div><label>Profile Name</label><input id="pName" type="text" /></div>
+          <div><label>Manufacturer</label><input id="pManufacturer" type="text" /></div>
+          <div><label>Barrel Length</label><input id="pBarrelLength" type="number" inputmode="decimal" step="0.001" /></div>
+          <div><label>Grooves</label><input id="pGrooves" type="number" inputmode="numeric" step="1" /></div>
+          <div><label>Round Count</label><input id="pRoundCount" type="number" inputmode="numeric" step="1" /></div>
+          <div><label>Tuner Setting</label><input id="pTunerSetting" type="text" /></div>
+          <div><label>Notes</label><textarea id="pNotes"></textarea></div>
+          <button class="green" onclick="saveProfile()">Save Profile</button>
+          <div id="profileError" class="error">Profile Name and Barrel Length are required.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aboutScreen" class="screen">
+      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="card center">
+        <img src="jmp-logo.png" class="logo" alt="JMP logo" />
+        <h2>JMP Harmonic Calculator</h2>
+        <p class="subtitle">Designed for 22 LR tuner and bloop tube harmonic calculations.</p>
+        <p class="subtitle">Tuner default end diameter: 1.341<br>Tube default end diameter: 1.500<br>Results rounded to 3 decimal places.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="printArea"></div>
+
+<script>
+let profiles = JSON.parse(localStorage.getItem("jmpProfiles") || "[]");
+let currentMode = "tuner";
+let currentResults = [];
+let selectedProfileId = null;
+let editingProfileId = null;
+
+function saveProfiles(){ localStorage.setItem("jmpProfiles", JSON.stringify(profiles)); }
+function fmt(v){ return Number(v).toFixed(3); }
+function id(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()); }
+
+function screen(name){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(name).classList.add("active");
+  window.scrollTo(0,0);
+}
+
+function showHome(){ screen("homeScreen"); }
+function showAbout(){ screen("aboutScreen"); }
+
+function openCalculator(mode){
+  currentMode = mode;
+  selectedProfileId = null;
+  calcBarrelLength.value = "";
+  calcEndDiameter.value = mode === "tuner" ? "1.341" : "1.500";
+  calcTitle.textContent = mode === "tuner" ? "Tuner Calculator" : "Tube Calculator";
+  diameterLabel.textContent = mode === "tuner" ? "Tuner End Diameter" : "Tube End Diameter";
+  calcResults.style.display = "none";
+  calcError.style.display = "none";
+  screen("calculatorScreen");
+}
+
+function calculateFromProfile(mode){
+  const p = profiles.find(x => x.id === selectedProfileId);
+  if(!p) return;
+  currentMode = mode;
+  calcBarrelLength.value = fmt(p.barrelLength);
+  calcEndDiameter.value = mode === "tuner" ? "1.341" : "1.500";
+  calcTitle.textContent = mode === "tuner" ? "Tuner Calculator" : "Tube Calculator";
+  diameterLabel.textContent = mode === "tuner" ? "Tuner End Diameter" : "Tube End Diameter";
+  calcResults.style.display = "none";
+  calcError.style.display = "none";
+  screen("calculatorScreen");
+}
+
+function calculate(){
+  const bl = parseFloat(calcBarrelLength.value);
+  const dia = parseFloat(calcEndDiameter.value);
+  if(!isFinite(bl) || bl <= 0 || !isFinite(dia) || dia <= 0){
+    calcError.style.display = "block";
+    calcResults.style.display = "none";
+    return;
+  }
+  calcError.style.display = "none";
+  const ec = dia * 0.264;
+  const rows = currentMode === "tuner"
+    ? [{name:"9th Harmonic", h:(bl/8)*9}, {name:"11th Harmonic", h:(bl/10)*11}]
+    : [{name:"3rd Harmonic", h:(bl/2)*3}, {name:"11th Quarter", h:(bl/8)*11}, {name:"13th Quarter", h:(bl/10)*13}];
+
+  currentResults = rows.map(r => ({ harmonicType:r.name, dimension:r.h - ec - bl }));
+  resultsTitle.textContent = currentMode === "tuner" ? "Tuner Results" : "Tube Results";
+  resultsList.innerHTML = currentResults.map(r => `
+    <div class="result-card">
+      <div class="result-title">${r.harmonicType}</div>
+      <div class="result-label">${currentMode === "tuner" ? "Tuner Dimension" : "Tube Dimension"}</div>
+      <div class="result-value">${fmt(r.dimension)}</div>
+    </div>`).join("");
+  calcResults.style.display = "block";
+}
+
+function saveCalcToSelectedProfile(){
+  if(currentResults.length === 0) return;
+  if(selectedProfileId === null){
+    showProfiles();
+    alert("Open a barrel profile first, then calculate from that profile to save the calculation.");
+    return;
+  }
+  const p = profiles.find(x => x.id === selectedProfileId);
+  if(!p) return;
+  p.calculations = p.calculations || [];
+  p.calculations.push({
+    date: new Date().toLocaleString(),
+    mode: currentMode,
+    endDiameter: parseFloat(calcEndDiameter.value),
+    results: currentResults
+  });
+  saveProfiles();
+  openProfile(selectedProfileId);
+}
+
+function showProfiles(){
+  renderProfiles();
+  screen("profilesScreen");
+}
+
+function renderProfiles(){
+  if(profiles.length === 0){
+    profilesList.innerHTML = `<div class="empty">No barrel profiles saved yet.</div>`;
+    return;
+  }
+  profilesList.innerHTML = profiles.map(p => `
+    <div class="profile-card" onclick="openProfile('${p.id}')">
+      <div class="profile-title">${p.profileName}</div>
+      <div class="meta">
+        Manufacturer: ${p.manufacturer || "-"}<br>
+        Barrel Length: ${fmt(p.barrelLength)} | Grooves: ${p.grooves || "-"}<br>
+        Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}
+      </div>
+    </div>`).join("");
+}
+
+function openProfile(profileId){
+  selectedProfileId = profileId;
+  const p = profiles.find(x => x.id === profileId);
+  if(!p) return;
+  detailName.textContent = p.profileName;
+  profileInfo.innerHTML = `
+    <div class="info-row"><span>Manufacturer</span><span>${p.manufacturer || "-"}</span></div>
+    <div class="info-row"><span>Barrel Length</span><span>${fmt(p.barrelLength)}</span></div>
+    <div class="info-row"><span>Grooves</span><span>${p.grooves || "-"}</span></div>
+    <div class="info-row"><span>Round Count</span><span>${p.roundCount || "0"}</span></div>
+    <div class="info-row"><span>Tuner Setting</span><span>${p.tunerSetting || "-"}</span></div>
+    <div class="info-row"><span>Notes</span><span>${p.notes || "-"}</span></div>`;
+  renderHistory(p);
+  screen("profileDetailScreen");
+}
+
+function renderHistory(p){
+  const calcs = p.calculations || [];
+  if(calcs.length === 0){
+    calcHistory.innerHTML = `<div class="empty">No saved calculations yet.</div>`;
+    return;
+  }
+  calcHistory.innerHTML = calcs.slice().reverse().map(c => `
+    <div class="profile-card">
+      <div class="profile-title">${c.mode === "tuner" ? "Tuner" : "Tube"} Calculation</div>
+      <div class="meta">${c.date}<br>End Diameter: ${fmt(c.endDiameter)}</div>
+      ${c.results.map(r => `<div class="info-row"><span>${r.harmonicType}</span><span>${fmt(r.dimension)}</span></div>`).join("")}
+    </div>`).join("");
+}
+
+function newProfile(){
+  editingProfileId = null;
+  profileEditTitle.textContent = "New Barrel Profile";
+  pName.value = ""; pManufacturer.value = ""; pBarrelLength.value = ""; pGrooves.value = "";
+  pRoundCount.value = ""; pTunerSetting.value = ""; pNotes.value = "";
+  profileError.style.display = "none";
+  screen("profileEditScreen");
+}
+
+function editCurrentProfile(){
+  const p = profiles.find(x => x.id === selectedProfileId);
+  if(!p) return;
+  editingProfileId = p.id;
+  profileEditTitle.textContent = "Edit Barrel Profile";
+  pName.value = p.profileName || "";
+  pManufacturer.value = p.manufacturer || "";
+  pBarrelLength.value = fmt(p.barrelLength);
+  pGrooves.value = p.grooves || "";
+  pRoundCount.value = p.roundCount || "";
+  pTunerSetting.value = p.tunerSetting || "";
+  pNotes.value = p.notes || "";
+  profileError.style.display = "none";
+  screen("profileEditScreen");
+}
+
+function saveProfile(){
+  const name = pName.value.trim();
+  const bl = parseFloat(pBarrelLength.value);
+  if(!name || !isFinite(bl) || bl <= 0){
+    profileError.style.display = "block";
+    return;
+  }
+  const data = {
+    id: editingProfileId || id(),
+    profileName: name,
+    manufacturer: pManufacturer.value.trim(),
+    barrelLength: bl,
+    grooves: pGrooves.value.trim(),
+    roundCount: pRoundCount.value.trim(),
+    tunerSetting: pTunerSetting.value.trim(),
+    notes: pNotes.value.trim(),
+    calculations: []
+  };
+  if(editingProfileId){
+    const old = profiles.find(x => x.id === editingProfileId);
+    data.calculations = old?.calculations || [];
+    profiles = profiles.map(x => x.id === editingProfileId ? data : x);
+  } else {
+    profiles.push(data);
+  }
+  saveProfiles();
+  openProfile(data.id);
+}
+
+function deleteCurrentProfile(){
+  if(!selectedProfileId) return;
+  if(!confirm("Delete this barrel profile?")) return;
+  profiles = profiles.filter(x => x.id !== selectedProfileId);
+  saveProfiles();
+  selectedProfileId = null;
+  showProfiles();
+}
+
+function printCurrentProfile(){
+  const p = profiles.find(x => x.id === selectedProfileId);
+  if(!p) return;
+  const calcs = p.calculations || [];
+  const calcHtml = calcs.length === 0 ? `<p>No saved calculations.</p>` : calcs.map(c => `
+    <div class="print-section">
+      <h3>${c.mode === "tuner" ? "Tuner Calculations" : "Tube Calculations"}</h3>
+      <div class="print-row"><strong>Date:</strong><span>${c.date}</span></div>
+      <div class="print-row"><strong>End Diameter:</strong><span>${fmt(c.endDiameter)}</span></div>
+      <table class="print-table">
+        <tr><th>Harmonic</th><th>${c.mode === "tuner" ? "Tuner Dimension" : "Tube Dimension"}</th></tr>
+        ${c.results.map(r => `<tr><td>${r.harmonicType}</td><td>${fmt(r.dimension)}</td></tr>`).join("")}
+      </table>
+    </div>`).join("");
+
+  printArea.innerHTML = `
+    <img class="print-logo" src="jmp-logo.png">
+    <div class="print-title">Barrel Profile Report</div>
+    <div class="print-date">Printed: ${new Date().toLocaleString()}</div>
+    <div class="print-section">
+      <h3>Profile Information</h3>
+      <div class="print-row"><strong>Profile Name:</strong><span>${p.profileName}</span></div>
+      <div class="print-row"><strong>Manufacturer:</strong><span>${p.manufacturer || "-"}</span></div>
+      <div class="print-row"><strong>Barrel Length:</strong><span>${fmt(p.barrelLength)}</span></div>
+      <div class="print-row"><strong>Grooves:</strong><span>${p.grooves || "-"}</span></div>
+      <div class="print-row"><strong>Round Count:</strong><span>${p.roundCount || "0"}</span></div>
+      <div class="print-row"><strong>Tuner Setting:</strong><span>${p.tunerSetting || "-"}</span></div>
+      <div class="print-row"><strong>Notes:</strong><span>${p.notes || "-"}</span></div>
+    </div>
+    <h3>Calculated Data</h3>
+    ${calcHtml}
+  `;
+  window.print();
+}
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
