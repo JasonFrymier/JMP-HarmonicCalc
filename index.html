@@ -322,11 +322,7 @@
       font-size:1.4rem;
     }
 
-    .modal-img {
-      width:100%;
-      display:block;
-      background:white;
-    }
+
 
     .modal-bottom {
       padding:12px;
@@ -335,6 +331,42 @@
 
     .modal-bottom button {
       text-align:center;
+    }
+
+
+    .modal-content {
+      background:#fff;
+      color:#111;
+      padding:16px;
+    }
+
+    .modal-description {
+      margin:0 0 12px;
+      font-size:1rem;
+      line-height:1.4;
+      color:#111;
+    }
+
+    .modal-description strong {
+      font-weight:900;
+    }
+
+    .modal-img {
+      width:100%;
+      display:block;
+      background:white;
+      border-radius:12px;
+      border:1px solid #d7dce5;
+      object-fit:contain;
+      max-height:52vh;
+    }
+
+    .modal-bullets {
+      margin:14px 0 0;
+      padding-left:22px;
+      font-size:.98rem;
+      line-height:1.55;
+      color:#111;
     }
 
     #printArea { display:none; }
@@ -487,7 +519,13 @@
         <span id="measureInfoTitle">Measurement Info</span>
         <button class="modal-close" onclick="hideMeasureInfo()">×</button>
       </div>
-      <img id="measureInfoImage" class="modal-img" src="" alt="Measurement information" />
+
+      <div class="modal-content">
+        <p id="measureInfoDescription" class="modal-description"></p>
+        <img id="measureInfoImage" class="modal-img" src="" alt="Measurement illustration" />
+        <ul id="measureInfoBullets" class="modal-bullets"></ul>
+      </div>
+
       <div class="modal-bottom">
         <button class="blue" onclick="hideMeasureInfo()">Got It</button>
       </div>
@@ -544,13 +582,26 @@ function showMeasureInfo(){
   const modal = document.getElementById("measureInfoModal");
   const img = document.getElementById("measureInfoImage");
   const title = document.getElementById("measureInfoTitle");
+  const description = document.getElementById("measureInfoDescription");
+  const bullets = document.getElementById("measureInfoBullets");
 
   if(currentMode === "tube"){
     img.src = "tube-measure-info.png";
     title.textContent = "How to Measure Tube Length";
+    description.innerHTML = 'The tube length is measured from the <strong>front end of the tube</strong> to the <strong>back end of the tube</strong>.';
+    bullets.innerHTML = `
+      <li>Start at the front end of the tube.</li>
+      <li>Measure to the back end of the tube.</li>
+      <li><strong>Do NOT measure the threads.</strong></li>
+    `;
   } else {
     img.src = "tuner-measure-info.png";
     title.textContent = "How to Measure Tuner Length";
+    description.innerHTML = 'The tuner length is measured from the <strong>end of the barrel muzzle</strong> to the <strong>end of the tuner body</strong>.';
+    bullets.innerHTML = `
+      <li>Start at the end of the barrel muzzle.</li>
+      <li>Measure to the end of the tuner body.</li>
+    `;
   }
 
   modal.classList.add("active");

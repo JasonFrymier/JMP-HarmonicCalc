@@ -69,3 +69,14 @@ This version fixes saving standalone tuner/tube calculations. After calculating,
 - Added Tuner w/ Tube Setting field to barrel profiles.
 - Tuner Setting and Tuner w/ Tube Setting are validated from 0 to 500 in .5 increments.
 - Updated terminology to use Tuner & Tube Length for tube calculations.
+
+
+## Version note v5
+
+- Replaced the full mockup help images with clean measurement-only images.
+- The X close button and Got It button are real app controls now.
+- Tuner help text:
+  The tuner length is measured from the end of the barrel muzzle to the end of the tuner body.
+- Tube help text:
+  The tube length is measured from the front end of the tube to the back end of the tube.
+  Do NOT measure the threads.
