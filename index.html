@@ -390,6 +390,118 @@
       color:#111;
     }
 
+
+    #saveCalculationModal {
+      z-index: 9000;
+    }
+
+    #barrelLengthModal {
+      z-index: 10000;
+    }
+
+
+    .app-nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .nav-left,
+    .nav-right {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .icon-btn {
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      padding:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.25rem;
+      line-height:1;
+      background:linear-gradient(180deg,#303846,#1d2430);
+      color:#fff;
+      border:1px solid var(--border);
+      text-align:center;
+      box-shadow: inset 0 1px rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.22);
+    }
+
+    .nav-title {
+      font-weight:900;
+      color:var(--text);
+      font-size:1rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:210px;
+    }
+
+    .drawer {
+      position:fixed;
+      inset:0;
+      z-index:11000;
+      background:rgba(0,0,0,.78);
+      display:none;
+    }
+
+    .drawer.active {
+      display:block;
+    }
+
+    .drawer-panel {
+      width:min(84vw, 340px);
+      height:100%;
+      background:#0b1019;
+      border-right:1px solid var(--border);
+      box-shadow:18px 0 48px rgba(0,0,0,.45);
+      padding:18px;
+      transform:translateX(-100%);
+      transition:transform .2s ease;
+    }
+
+    .drawer.active .drawer-panel {
+      transform:translateX(0);
+    }
+
+    .drawer-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:16px;
+    }
+
+    .drawer-logo {
+      width:190px;
+      max-width:75%;
+      border-radius:8px;
+    }
+
+    .drawer-link {
+      width:100%;
+      border:1px solid var(--border);
+      background:#151b27;
+      color:#fff;
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:10px;
+      font-weight:850;
+      text-align:left;
+      box-shadow:none;
+    }
+
+    .drawer-link small {
+      display:block;
+      color:var(--muted);
+      margin-top:3px;
+      font-weight:500;
+    }
+
     #printArea { display:none; }
 
     @media print {
@@ -423,6 +535,11 @@
 <body>
   <main class="app">
     <section id="homeScreen" class="screen active center">
+      <div class="app-nav">
+        <button class="icon-btn" onclick="showDrawer()">☰</button>
+        <div class="nav-title">JMP Harmonics</div>
+        <span style="width:42px;"></span>
+      </div>
       <img src="jmp-logo.png" class="logo" alt="JMP logo" />
       <div class="menu">
         <button class="menu-btn blue" onclick="openCalculator('tuner')">Calculate Tuner <small>Calculate tuner length</small></button>
@@ -434,7 +551,14 @@
     </section>
 
     <section id="calculatorScreen" class="screen">
-      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="app-nav">
+        <div class="nav-left">
+          <button class="icon-btn" onclick="showHome()">‹</button>
+          <button class="icon-btn" onclick="showDrawer()">☰</button>
+        </div>
+        <div class="nav-title" id="calcNavTitle">Calculator</div>
+        <button class="icon-btn" onclick="goHome()">🏠</button>
+      </div>
       <div class="card">
         <div class="calc-title-row">
           <h2 id="calcTitle">Calculator</h2>
@@ -492,7 +616,14 @@
     </section>
 
     <section id="profileEditScreen" class="screen">
-      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="app-nav">
+        <div class="nav-left">
+          <button class="icon-btn" onclick="showHome()">‹</button>
+          <button class="icon-btn" onclick="showDrawer()">☰</button>
+        </div>
+        <div class="nav-title">Barrel Profile</div>
+        <button class="icon-btn" onclick="goHome()">🏠</button>
+      </div>
       <div class="card">
         <h2 id="profileEditTitle">New Barrel Profile</h2>
         <div class="stack">
@@ -511,7 +642,14 @@
     </section>
 
     <section id="aboutScreen" class="screen">
-      <span class="back" onclick="showHome()">‹ Back</span>
+      <div class="app-nav">
+        <div class="nav-left">
+          <button class="icon-btn" onclick="showHome()">‹</button>
+          <button class="icon-btn" onclick="showDrawer()">☰</button>
+        </div>
+        <div class="nav-title">About</div>
+        <button class="icon-btn" onclick="goHome()">🏠</button>
+      </div>
       <div class="card center">
         <img src="jmp-logo.png" class="logo" alt="JMP logo" />
         <h2>JMP Harmonic Calculator</h2>
@@ -578,6 +716,22 @@
     </div>
   </div>
 
+
+  <div id="appDrawer" class="drawer" onclick="closeDrawer(event)">
+    <div class="drawer-panel" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <img src="jmp-logo.png" class="drawer-logo" alt="JMP logo" />
+        <button class="icon-btn" onclick="hideDrawer()">×</button>
+      </div>
+
+      <button class="drawer-link" onclick="goHome()">🏠 Home <small>Main screen</small></button>
+      <button class="drawer-link" onclick="drawerCalculateTuner()">🎯 Calculate Tuner <small>Tuner length calculator</small></button>
+      <button class="drawer-link" onclick="drawerOpenProfiles()">📁 Barrel Profiles <small>Open saved barrel profiles</small></button>
+      <button class="drawer-link" onclick="drawerNewProfile()">➕ New Barrel Profile <small>Create a new barrel profile</small></button>
+      <button class="drawer-link" onclick="drawerAbout()">ℹ️ About <small>App information</small></button>
+    </div>
+  </div>
+
   <div id="printArea"></div>
 
 <script>
@@ -618,6 +772,7 @@ function continueReplaceBarrelLength(){
 }
 
 function showBarrelLengthConflict(profile){
+  hideSaveCalculationModal();
   pendingConflictProfileId = profile.id;
   const currentLength = getCurrentBarrelLength();
   const matchText = barrelLengthsMatch(profile.barrelLength, currentLength)
@@ -672,6 +827,48 @@ function screen(name){
     document.body.scrollTop = 0;
     window.scrollTo(0, 0);
   }, 0);
+}
+
+function showDrawer(){
+  document.getElementById("appDrawer").classList.add("active");
+}
+
+function hideDrawer(){
+  document.getElementById("appDrawer").classList.remove("active");
+}
+
+function closeDrawer(event){
+  if(event.target.id === "appDrawer"){
+    hideDrawer();
+  }
+}
+
+function goHome(){
+  hideDrawer();
+  hideSaveCalculationModal();
+  hideMeasureInfo();
+  hideBarrelLengthModal();
+  showHome();
+}
+
+function drawerCalculateTuner(){
+  hideDrawer();
+  openCalculator("tuner");
+}
+
+function drawerOpenProfiles(){
+  hideDrawer();
+  showProfiles();
+}
+
+function drawerNewProfile(){
+  hideDrawer();
+  newProfile();
+}
+
+function drawerAbout(){
+  hideDrawer();
+  showAbout();
 }
 
 function showMeasureInfo(){
@@ -739,6 +936,7 @@ function openCalculator(mode){
   calcBarrelLength.value = "";
   calcEndDiameter.value = mode === "tuner" ? "1.341" : "1.500";
   calcTitle.textContent = mode === "tuner" ? "Tuner Calculator" : "Tube Calculator";
+  if(document.getElementById("calcNavTitle")) calcNavTitle.textContent = mode === "tuner" ? "Tuner Calculator" : "Tube Calculator";
   diameterLabel.textContent = mode === "tuner" ? "Tuner End Diameter" : "Tube End Diameter";
   calcResults.style.display = "none";
   calcError.style.display = "none";
@@ -752,6 +950,7 @@ function calculateFromProfile(mode){
   calcBarrelLength.value = fmt(p.barrelLength);
   calcEndDiameter.value = mode === "tuner" ? "1.341" : "1.500";
   calcTitle.textContent = mode === "tuner" ? "Tuner Calculator" : "Tube Calculator";
+  if(document.getElementById("calcNavTitle")) calcNavTitle.textContent = mode === "tuner" ? "Tuner Calculator" : "Tube Calculator";
   diameterLabel.textContent = mode === "tuner" ? "Tuner End Diameter" : "Tube End Diameter";
   calcResults.style.display = "none";
   calcError.style.display = "none";

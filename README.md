@@ -107,3 +107,16 @@ This version fixes saving standalone tuner/tube calculations. After calculating,
 
 - Changed Save Calculation profile selection from a separate screen to a popup modal over the results.
 - This removes the large blank-space/scroll-position issue when saving calculations.
+
+
+## Version note v10
+
+- Fixed modal stacking so the barrel length warning appears on top when saving to an existing profile.
+- The save profile modal closes before the barrel length warning opens.
+
+
+## Version note v11
+
+- Added Home icon navigation on app screens.
+- Added slide-out navigation menu with Home, Calculate Tuner, Barrel Profiles, New Barrel Profile, and About.
+- Added consistent top navigation bar styling for a more native phone-app feel.
