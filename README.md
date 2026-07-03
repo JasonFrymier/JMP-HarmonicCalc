@@ -96,3 +96,14 @@ This version fixes saving standalone tuner/tube calculations. After calculating,
   - Cancel
 - Each barrel profile now stores only one barrel length, one tuner calculation set, and one tube calculation set.
 - Saving a new tuner or tube calculation replaces the previous calculation of that same type for the selected profile.
+
+
+## Version note v8
+
+- Fixed Save Calculation screen opening with a large blank area at the top by forcing the page to reset scroll position when switching screens.
+
+
+## Version note v9
+
+- Changed Save Calculation profile selection from a separate screen to a popup modal over the results.
+- This removes the large blank-space/scroll-position issue when saving calculations.

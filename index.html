@@ -370,22 +370,6 @@
     }
 
 
-    #saveCalculationScreen {
-      padding-top: 0 !important;
-      margin-top: 0 !important;
-      min-height: auto !important;
-    }
-
-    #saveCalculationScreen .back {
-      margin-top: 0 !important;
-      display: inline-block;
-    }
-
-    #saveCalculationScreen .card {
-      margin-top: 8px !important;
-    }
-
-
     .choice-buttons {
       display:flex;
       flex-direction:column;
@@ -536,21 +520,7 @@
       </div>
     </section>
   </main>
-
-
-    <section id="saveCalculationScreen" class="screen">
-      <span class="back" onclick="screen('calculatorScreen')">‹ Back</span>
-      <div class="card">
-        <h2>Save Calculation</h2>
-        <p class="subtitle">Choose a saved barrel profile to add this calculation to, or create a new barrel profile.</p>
-        <div id="saveProfileList"></div>
-        <button class="green" onclick="newProfileForCalculation()">New Barrel Profile</button>
-      </div>
-    </section>
-
-
-
-  <div id="measureInfoModal" class="modal" onclick="closeMeasureInfo(event)">
+<div id="measureInfoModal" class="modal" onclick="closeMeasureInfo(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-top">
         <span id="measureInfoTitle">Measurement Info</span>
@@ -585,6 +555,24 @@
           <button class="blue" onclick="continueReplaceBarrelLength()">Continue and Replace Barrel Length</button>
           <button class="green" onclick="newProfileForCalculation()">Save to a New Profile</button>
           <button class="gray" onclick="hideBarrelLengthModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="saveCalculationModal" class="modal" onclick="closeSaveCalculationModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <span>Save Calculation</span>
+        <button class="modal-close" onclick="hideSaveCalculationModal()">×</button>
+      </div>
+      <div class="modal-content">
+        <p class="modal-description">Choose a saved barrel profile to add this calculation to, or create a new barrel profile.</p>
+        <div id="saveProfileList"></div>
+        <div class="choice-buttons">
+          <button class="green" onclick="newProfileForCalculation()">New Barrel Profile</button>
+          <button class="gray" onclick="hideSaveCalculationModal()">Cancel</button>
         </div>
       </div>
     </div>
@@ -671,8 +659,19 @@ function validTunerSetting(value){
 
 function screen(name){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(name).classList.add("active");
-  window.scrollTo(0,0);
+  const activeScreen = document.getElementById(name);
+  activeScreen.classList.add("active");
+
+  // Reset scroll every time a screen opens.
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+  setTimeout(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, 0);
 }
 
 function showMeasureInfo(){
@@ -711,6 +710,18 @@ function hideMeasureInfo(){
 function closeMeasureInfo(event){
   if(event.target.id === "measureInfoModal"){
     hideMeasureInfo();
+  }
+}
+
+
+function hideSaveCalculationModal(){
+  const modal = document.getElementById("saveCalculationModal");
+  if(modal) modal.classList.remove("active");
+}
+
+function closeSaveCalculationModal(event){
+  if(event.target.id === "saveCalculationModal"){
+    hideSaveCalculationModal();
   }
 }
 
@@ -852,6 +863,7 @@ function saveCurrentCalculationToProfile(profileId, allowReplaceBarrelLength = f
   saveProfiles();
   pendingSaveCalculation = false;
   selectedProfileId = profileId;
+  hideSaveCalculationModal();
   openProfile(profileId);
 }
 
@@ -859,12 +871,12 @@ function showSaveCalculationOptions(){
   const list = document.getElementById("saveProfileList");
 
   if(profiles.length === 0){
-    list.innerHTML = `<div class="empty">No barrel profiles saved yet. Create a new barrel profile to save this calculation.</div>`;
+    list.innerHTML = `<div class="empty" style="color:#111;">No barrel profiles saved yet. Create a new barrel profile to save this calculation.</div>`;
   } else {
     list.innerHTML = profiles.map(p => `
-      <div class="profile-card" onclick="saveCurrentCalculationToProfile('${p.id}')">
+      <div class="profile-card" onclick="saveCurrentCalculationToProfile('${p.id}')" style="background:#f7f9fc;color:#111;border-color:#ccd4df;">
         <div class="profile-title">${p.profileName}</div>
-        <div class="meta">
+        <div class="meta" style="color:#333;">
           Manufacturer: ${p.manufacturer || "-"}<br>
           Barrel Length: ${fmt(p.barrelLength)} | Grooves: ${p.grooves || "-"}<br>
           Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}<br>
@@ -873,11 +885,11 @@ function showSaveCalculationOptions(){
       </div>`).join("");
   }
 
-  screen("saveCalculationScreen");
-  window.scrollTo(0, 0);
+  document.getElementById("saveCalculationModal").classList.add("active");
 }
 
 function newProfileForCalculation(){
+  hideSaveCalculationModal();
   hideBarrelLengthModal();
   pendingSaveCalculation = true;
   editingProfileId = null;
