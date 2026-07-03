@@ -85,3 +85,14 @@ This version fixes saving standalone tuner/tube calculations. After calculating,
 ## Version note v6
 
 - Fixed large blank space on the Save Calculation screen so profile choices appear immediately near the top.
+
+
+## Version note v7
+
+- Added barrel length conflict handling when saving a calculation to an existing profile.
+- If the calculation barrel length does not match the saved profile barrel length, the user is prompted to:
+  - Continue and replace the barrel length
+  - Save to a new profile
+  - Cancel
+- Each barrel profile now stores only one barrel length, one tuner calculation set, and one tube calculation set.
+- Saving a new tuner or tube calculation replaces the previous calculation of that same type for the selected profile.

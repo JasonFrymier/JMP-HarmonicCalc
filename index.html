@@ -385,6 +385,27 @@
       margin-top: 8px !important;
     }
 
+
+    .choice-buttons {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:14px;
+    }
+    .warning-text {
+      color:#111;
+      line-height:1.45;
+      font-size:1rem;
+    }
+    .warning-box {
+      background:#fff4d6;
+      border:1px solid #e0b341;
+      border-radius:12px;
+      padding:12px;
+      margin:12px 0;
+      color:#111;
+    }
+
     #printArea { display:none; }
 
     @media print {
@@ -481,7 +502,7 @@
         </div>
       </div>
       <div class="card">
-        <h2>Calculation History</h2>
+        <h2>Saved Calculations</h2>
         <div id="calcHistory"></div>
       </div>
     </section>
@@ -548,6 +569,27 @@
     </div>
   </div>
 
+
+  <div id="barrelLengthModal" class="modal" onclick="closeBarrelLengthModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <span>Barrel Length Warning</span>
+        <button class="modal-close" onclick="hideBarrelLengthModal()">×</button>
+      </div>
+      <div class="modal-content">
+        <p id="barrelLengthMessage" class="warning-text"></p>
+        <div class="warning-box">
+          Each barrel profile can only have one barrel length, one tuner calculation set, and one tube calculation set.
+        </div>
+        <div class="choice-buttons">
+          <button class="blue" onclick="continueReplaceBarrelLength()">Continue and Replace Barrel Length</button>
+          <button class="green" onclick="newProfileForCalculation()">Save to a New Profile</button>
+          <button class="gray" onclick="hideBarrelLengthModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="printArea"></div>
 
 <script>
@@ -557,9 +599,48 @@ let currentResults = [];
 let selectedProfileId = null;
 let editingProfileId = null;
 let pendingSaveCalculation = false;
+let pendingConflictProfileId = null;
 
 function saveProfiles(){ localStorage.setItem("jmpProfiles", JSON.stringify(profiles)); }
 function fmt(v){ return Number(v).toFixed(3); }
+
+function barrelLengthsMatch(a, b){
+  return Math.abs(Number(a) - Number(b)) < 0.0005;
+}
+
+function getCurrentBarrelLength(){
+  return Number(parseFloat(calcBarrelLength.value));
+}
+
+function hideBarrelLengthModal(){
+  document.getElementById("barrelLengthModal").classList.remove("active");
+  pendingConflictProfileId = null;
+}
+
+function closeBarrelLengthModal(event){
+  if(event.target.id === "barrelLengthModal"){
+    hideBarrelLengthModal();
+  }
+}
+
+function continueReplaceBarrelLength(){
+  if(!pendingConflictProfileId) return;
+  saveCurrentCalculationToProfile(pendingConflictProfileId, true);
+  hideBarrelLengthModal();
+}
+
+function showBarrelLengthConflict(profile){
+  pendingConflictProfileId = profile.id;
+  const currentLength = getCurrentBarrelLength();
+  const matchText = barrelLengthsMatch(profile.barrelLength, currentLength)
+    ? `The barrel length matches this profile.<br><br>Profile Barrel Length: ${fmt(profile.barrelLength)}<br>Calculation Barrel Length: ${fmt(currentLength)}`
+    : `The barrel length does NOT match this profile.<br><br>Profile Barrel Length: ${fmt(profile.barrelLength)}<br>Calculation Barrel Length: ${fmt(currentLength)}`;
+
+  document.getElementById("barrelLengthMessage").innerHTML =
+    `${matchText}<br><br>Do you want to continue and replace the barrel length, save this calculation to a new profile, or cancel?`;
+
+  document.getElementById("barrelLengthModal").classList.add("active");
+}
 
 function getProfileTunerLength(profile){
   const calcs = (profile && profile.calculations) ? profile.calculations : [];
@@ -746,12 +827,28 @@ function makeCurrentCalculation(){
   };
 }
 
-function saveCurrentCalculationToProfile(profileId){
+function saveCurrentCalculationToProfile(profileId, allowReplaceBarrelLength = false){
   const p = profiles.find(x => x.id === profileId);
   if(!p) return;
 
+  const currentLength = getCurrentBarrelLength();
+
+  if(!allowReplaceBarrelLength && p.barrelLength && currentLength && !barrelLengthsMatch(p.barrelLength, currentLength)){
+    showBarrelLengthConflict(p);
+    return;
+  }
+
+  if(allowReplaceBarrelLength && currentLength > 0){
+    p.barrelLength = currentLength;
+  }
+
   p.calculations = p.calculations || [];
-  p.calculations.push(makeCurrentCalculation());
+  const newCalculation = makeCurrentCalculation();
+
+  // Each profile stores only one tuner calculation set and one tube calculation set.
+  p.calculations = p.calculations.filter(c => c.mode !== newCalculation.mode);
+  p.calculations.push(newCalculation);
+
   saveProfiles();
   pendingSaveCalculation = false;
   selectedProfileId = profileId;
@@ -770,7 +867,8 @@ function showSaveCalculationOptions(){
         <div class="meta">
           Manufacturer: ${p.manufacturer || "-"}<br>
           Barrel Length: ${fmt(p.barrelLength)} | Grooves: ${p.grooves || "-"}<br>
-          Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}
+          Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}<br>
+          Barrel Length Match: ${barrelLengthsMatch(p.barrelLength, getCurrentBarrelLength()) ? "Yes" : "No"}
         </div>
       </div>`).join("");
   }
@@ -780,6 +878,7 @@ function showSaveCalculationOptions(){
 }
 
 function newProfileForCalculation(){
+  hideBarrelLengthModal();
   pendingSaveCalculation = true;
   editingProfileId = null;
   profileEditTitle.textContent = "New Barrel Profile";
@@ -810,7 +909,8 @@ function renderProfiles(){
       <div class="meta">
         Manufacturer: ${p.manufacturer || "-"}<br>
         Barrel Length: ${fmt(p.barrelLength)} | Grooves: ${p.grooves || "-"}<br>
-        Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}
+        Round Count: ${p.roundCount || "0"} | Tuner Setting: ${p.tunerSetting || "-"}<br>
+          Barrel Length Match: ${barrelLengthsMatch(p.barrelLength, getCurrentBarrelLength()) ? "Yes" : "No"}
       </div>
     </div>`).join("");
 }
@@ -904,7 +1004,9 @@ function saveProfile(){
     const savedProfile = profiles.find(x => x.id === data.id);
     if(savedProfile){
       savedProfile.calculations = savedProfile.calculations || [];
-      savedProfile.calculations.push(makeCurrentCalculation());
+      const newCalculation = makeCurrentCalculation();
+      savedProfile.calculations = savedProfile.calculations.filter(c => c.mode !== newCalculation.mode);
+      savedProfile.calculations.push(newCalculation);
     }
     pendingSaveCalculation = false;
   }
