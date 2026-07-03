@@ -1,4 +1,4 @@
-const CACHE_NAME = "jmp-harmonics-v11";
+const CACHE_NAME = "jmp-harmonics-v12";
 const FILES = [
   "./",
   "index.html",

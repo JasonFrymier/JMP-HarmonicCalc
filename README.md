@@ -120,3 +120,10 @@ This version fixes saving standalone tuner/tube calculations. After calculating,
 - Added Home icon navigation on app screens.
 - Added slide-out navigation menu with Home, Calculate Tuner, Barrel Profiles, New Barrel Profile, and About.
 - Added consistent top navigation bar styling for a more native phone-app feel.
+
+
+## Version note v12
+
+- Added About wording about the refined Purdy Method variation and ±10 clicks.
+- Strengthened Home/Menu navigation styling so icons are visible consistently.
+- Changed Home icon to a simple house symbol for better rendering.
