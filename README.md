@@ -80,3 +80,8 @@ This version fixes saving standalone tuner/tube calculations. After calculating,
 - Tube help text:
   The tube length is measured from the front end of the tube to the back end of the tube.
   Do NOT measure the threads.
+
+
+## Version note v6
+
+- Fixed large blank space on the Save Calculation screen so profile choices appear immediately near the top.

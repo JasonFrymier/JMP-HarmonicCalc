@@ -369,6 +369,22 @@
       color:#111;
     }
 
+
+    #saveCalculationScreen {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+      min-height: auto !important;
+    }
+
+    #saveCalculationScreen .back {
+      margin-top: 0 !important;
+      display: inline-block;
+    }
+
+    #saveCalculationScreen .card {
+      margin-top: 8px !important;
+    }
+
     #printArea { display:none; }
 
     @media print {
@@ -760,6 +776,7 @@ function showSaveCalculationOptions(){
   }
 
   screen("saveCalculationScreen");
+  window.scrollTo(0, 0);
 }
 
 function newProfileForCalculation(){
